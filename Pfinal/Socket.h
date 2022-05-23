@@ -177,6 +177,26 @@ public:
         return ::bind(sd, (const struct sockaddr *) &sa, sa_len);
     }
 
+     Socket* accept()
+    {
+        struct sockaddr client;
+        socklen_t clientLen = sizeof(struct sockaddr);
+        int s = ::accept(sd, &client, &clientLen);
+
+        return new Socket(s, client, clientLen);
+    }
+
+
+    int listen()
+    {
+        int t =::listen(sd, 0);
+                
+        if(t < 0){
+            std::cerr << strerror(errno) << '\n';
+            }
+        return t;
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const Socket& dt){
          char host[NI_MAXHOST];
          char serv[NI_MAXSERV];
