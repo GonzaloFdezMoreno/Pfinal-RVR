@@ -147,7 +147,7 @@ class Player{
         resetGame();
     };
 
-     };
+     
 
     ~Player() {};
 
