@@ -1,6 +1,6 @@
 #include <string>
 #include <string.h>
-#include <uinstd.h>
+#include <unistd.h>
 #include <vector>
 #include <memory>
 #include "Serializable.h"
@@ -19,7 +19,7 @@ public:
         LOGIN_INFO, //el nickname de cada jugador que se da a los clientes
         WINNER, //quien ha ganado la partida aunque pueden perder ambos tambien
         END_ROUND //se acaba la ronda y se reinicia la partida
-    }
+    };
 
     Message() : nickname(""), type(0), message1(0), message2(0) {};
 
