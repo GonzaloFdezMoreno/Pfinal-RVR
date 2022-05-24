@@ -296,3 +296,11 @@ class Player{
 
 
 };
+
+int main(int argc, char **argv) {
+    if (argc != 4 || argv[1] == "Server") return -1;
+    Player ec(argv[1], argv[2], argv[3]);
+    std::thread net_thread([&ec](){ ec.net_thread(); }); net_thread.detach();
+    ec.login();
+    ec.input_thread();
+}
