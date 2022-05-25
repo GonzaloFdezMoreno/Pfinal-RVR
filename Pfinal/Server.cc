@@ -102,4 +102,14 @@ private:
     }
 
     //continuar a partir de linea 192
+
+
+    
+};
+
+int main(int arg, char *argv[]) {
+    if (arg != 3) return -1;
+    GameServer es(argv[1], argv[2]);
+    es.do_messages();
+    return 0;
 }
