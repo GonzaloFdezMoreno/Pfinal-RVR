@@ -6,8 +6,12 @@
 //#include "Texture.cpp"
 //#include "Font.cpp"
 #include "Mazo.cc"
+#include <SDL2/SDL.h>
 
 
+
+const int CARD_WIDTH=10;
+const int CARD_HEIGHT=20;
 
 class Player{
  private:
@@ -21,11 +25,12 @@ class Player{
 
     //Arrays y contadores
     int usedNicks = 1;
-    std::string nicks[NUM_PLAYERS];
+    std::string nicks[2];
     int cardNum = 0;
     int cardsTable[3];
+    
 
-    int hands[NUM_PLAYERS][2]; // -1 significa que no se conoce la carta
+    int hands[2][2]; // -1 significa que no se conoce la carta
     
     SDL_Window* window;
     SDL_Renderer* renderer;
@@ -35,17 +40,17 @@ class Player{
         resetState();
         usedNicks = 1;
         cardNum = 0;
-        for (int i = 0; i < NUM_PLAYERS; i++) wins[i] = 0;
+        
         state = UNSTARTED;
     }
 
     //Se acaba la ronda; se resetea el estado del juego
     void resetState() {
-        for (int i = 0; i < NUM_PLAYERS; i++) {
+        for (int i = 0; i < 2; i++) {
             for (int j = 0; j < 2; j++) {
                 hands[i][j] = -1;
             }
-            discarded[i] = 0;
+            
         }
         for (int i = 0; i < 3; i++)
             cardsTable[i] = 0;
@@ -58,12 +63,12 @@ class Player{
         winX = winY = SDL_WINDOWPOS_CENTERED;
         // InicializaciOn del sistema, ventana y renderer
         SDL_Init(SDL_INIT_EVERYTHING);
-        window = SDL_CreateWindow("Poker De-lux", winX, winY, WIN_WIDTH, WIN_HEIGHT, SDL_WINDOW_SHOWN);
+        window = SDL_CreateWindow("Poker De-lux", winX, winY, 500, 400, SDL_WINDOW_SHOWN);
         renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
         
-        TTF_Init();
+        /*TTF_Init();
         texture = new Texture(renderer, DECK_SOURCE);
-        font = new Font(FONT_SOURCE, 25);
+        font = new Font(FONT_SOURCE, 25);*/
     }
 
     //Se renderiza el estado del juego
@@ -72,13 +77,13 @@ class Player{
         SDL_SetRenderDrawColor(renderer, 48, 132, 70, 255);
         SDL_RenderClear(renderer); //Clear
 
-        Texture* text;
+        //Texture* text;
 
         //Se colocan las cartas de cada jugador siguiendo una elipse
         double angle = 0;
         SDL_Rect dest, source; dest.w = CARD_WIDTH; dest.h = CARD_HEIGHT;
-        for (int i = 0; i < NUM_PLAYERS; i++) {
-            angle = i * (360 / NUM_PLAYERS);
+        /*for (int i = 0; i < 2; i++) {
+            angle = i * (360 / 2);
             angle *= (M_PI / 180);
 
             int ax = ( WIN_WIDTH / 2 - CARD_HEIGHT/2 - CARD_OFFSET) * sin(angle) + (WIN_WIDTH / 2), 
@@ -135,19 +140,19 @@ class Player{
             dest.x = ax + (CARD_WIDTH + CARD_OFFSET * 2) * j;
             Deck::getCardCoor(cardsTable[j], source.x, source.y, source.w, source.h); 
             texture->render(dest, source);
-        }
+        }*/
         SDL_RenderPresent(renderer); //Se dibuja el nuevo frame
     }
 
   public:
-    Player(const char * s, const char * p, char * n)  {
-        socket = Socket(s, p, false);
+    Player(const char * s, const char * p, char * n) {
+        socket = Socket(s, p);
         nicks[0] = n;
         state = UNSTARTED;
         resetGame();
     };
 
-     
+    
 
     ~Player() {};
 
@@ -177,7 +182,7 @@ class Player{
             else inst = inp;
 
             Message em = Message();
-            em.nick = nicks[0];
+            em.nickname = nicks[0];
             if (inst == "LOGOUT")
             {
                 em.type = Message::LOGOUT;
@@ -185,7 +190,7 @@ class Player{
                 socket.close();
                 return;
             } 
-            else if (inst == "DISCARD") {
+            /*else if (inst == "DISCARD") {
                 //Si se descarta hay que ver cuantas cartas se descartan y cuales para decirselo al servidor
                 //DISCARD -> 0 descartes; DISCARD 1 -> Se descarta la de la izquierda
                 //DISCARD 2 -> Se descarta la de la derecha; DISCARD 1 2 -> Se descartan ambas
@@ -201,7 +206,7 @@ class Player{
                     em.message2 = std::stoi(inp);
                 }
                 if (em.message1 < 0 || em.message1 > 2 || em.message2 < 0 || em.message2 > 2) continue;
-            }
+            }*/
             else continue;
   
             // Enviar al servidor usando socket
@@ -213,11 +218,11 @@ class Player{
     void render_thread() {
         initRender();
         while (state != UNSTARTED) render();
-        if (texture != nullptr) delete texture;
-        if (texture != nullptr) delete font;
+       // if (texture != nullptr) delete texture;
+       // if (texture != nullptr) delete font;
         if (renderer != nullptr) SDL_DestroyRenderer(renderer);
         if (window != nullptr) SDL_DestroyWindow(window);
-        TTF_Quit();
+        //TTF_Quit();
         SDL_Quit();
     }
 
@@ -225,24 +230,25 @@ class Player{
     void net_thread() {
         while(true) {
             Message msg;
-            socket.recv(msg, socket);
+            socket.recv(socket);
             switch (msg.type)
             {
                 case Message::LOGIN_INFO:
                 {
                     //Se reciben los nicks de los jugadores en conjunto.
                     //Se guardan y se ordenan siguiendo el orden de turnos.
-                    if (msg.nick == nicks[0]) continue;
-                    nicks[usedNicks] = msg.nick; //Se entiende que el servidor no permite que se conecten mas de NUM_PLAYERS jugadores
+                    if (msg.nickname == nicks[0]) continue;
+                    nicks[usedNicks] = msg.nickname; //Se entiende que el servidor no permite que se conecten mas de NUM_PLAYERS jugadores
                     usedNicks++;
                     //Cuando están todos comienza la partida.
-                    if (usedNicks == NUM_PLAYERS) {
+                    if (usedNicks == 2) {
                         state = PLAYING;
                         Player* p = this;
                         std::thread render_thr([p](){ p->render_thread(); }); render_thr.detach();
                     }
                     break;
                 }
+                /*
                 case Message::DISCARD:
                 {
                     //Message1 -> La carta descartada; Message2 -> La nueva carta
@@ -289,7 +295,7 @@ class Player{
                         if (pos == -1) std::cerr << "Invalid Nick: " << msg.nick << "\n";
                         wins[pos]++;
                     }
-                }
+                }*/
             }
         }
     }
