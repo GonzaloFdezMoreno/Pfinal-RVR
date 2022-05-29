@@ -52,23 +52,36 @@ private:
     std::vector<int> cardsTable; //cartas en la mesa (puesto por si aca, borrarlo si no tiene uso)
     std::vector<std::pair<std::unique_ptr<Socket>, std::string>> clients; //lista de clientes
 
+    std::vector<int> myCards; //vector donde estan mis cartas
+    int sumOfCards; //int que almacena la suma de los numeros de mis cartas
+    std::vector<int> opponentCards; //vector donde estan las cartas del oponente (puesto por si acaso)
+    int sumOfOpponent; //int que almacena la suma de los numeros de las cartas del oponente
+
     void game() {
         deck = new Deck();
         Message m;
 
         std::cout << "2 cards are given to each player\n";
-        for(int i = 0; i < clients.size(); i++){
+        /*for(int i = 0; i < clients.size(); i++){
             m = Message(clients[i].second, Message::CARDS, deck->draw(), deck->draw());
             socket.send(m, *clients[i].first.get());
             hands[i][0] = m.message1, hands[i][1] = m.message2;
+        }*/
+        //de momento solo roba mis cartas, falta enviar el mensaje con las cartas y que al recibirlas se añadan al vector 
+        //del oponente
+        for(int i = 0; i < 2; i++){
+            myCards.push_back(deck->draw());
         }
-        //Falta el resto de metodos y eso asi que mirarlo
+        //ahora tocaria recibir el mensaje de las cartas del oponente y añadirlas a su vector
+        //Falta el resto de metodos 
 
     }
 
     void closeGame() {
         if(deck != nullptr) delete deck;
         //cardsTable.clear();
+        myCards.clear();
+        opponentCards.clear();
     }
 
     //manda mensaje a todos los jugadores
@@ -103,7 +116,20 @@ private:
 
     //continuar a partir de linea 192
 
-
+    void checkCards(){
+        int total = 0;
+        //primero sumo las cartas de mi mano
+        for(int i = 0; i < myCards.size(); i++){
+            total += myCards[i];
+        }
+        sumOfCards = total;
+        total = 0;
+        //sumo las cartas del oponente excepto la primera
+        for(int i = 1; i < opponentCards.size(); i++){
+            total += opponentCards[i];
+        }
+        sumOfOpponent = total;
+    }
     
 };
 
