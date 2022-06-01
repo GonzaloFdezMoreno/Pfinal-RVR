@@ -57,7 +57,7 @@ public:
 
 class Message: public Serializable {
 public:
-    static const size_t MESSAGE_SIZE = 9 * sizeof(char) + 3 * sizeof(uint8_t);
+    static const size_t MESSAGE_SIZE = 9 * sizeof(char) + 5 * sizeof(uint8_t);
 
     enum MessageType{
         LOGIN=0, //se conecta un jugador, tiene nickname
@@ -68,12 +68,13 @@ public:
         CARDS_OPONENT=5, //las cartas que tiene el oponente que se podran ver todas menos la primera
         LOGIN_INFO=6, //el nickname de cada jugador que se da a los clientes
         WINNER=7, //quien ha ganado la partida aunque pueden perder ambos tambien
-        END_ROUND=8 //se acaba la ronda y se reinicia la partida
+        END_ROUND=8, //se acaba la ronda y se reinicia la partida
+        START
     };
 
-    Message() : nick(""), type(0), message1(0), message2(0) {};
+    Message() : nick(""), type(0), sum1(0), sum2(0),resta1(0),resta2(0) {};
 
-    Message(const std::string& n, const std::string& m, int m1, int m2) : nick(n), messageX(m), message1(m1), message2(m2) {};
+    Message(const std::string& n, const std::string& m,uint8_t n1, uint8_t n2,uint8_t rest1,uint8_t rest2) : nick(n), messageX(m),sum1(n1),sum2(n2),resta1(rest1),resta2(rest2) {};
 
     void to_bin();
     int from_bin(char * obj);
@@ -84,9 +85,11 @@ public:
     std::string messageX;
     //std::vector<int>  message1;
     //std::vector<int>  message2;
-
-    int message1;
-    int message2;
+    uint8_t sum1;
+    uint8_t sum2;
+    uint8_t resta1;
+    uint8_t resta2;
+    
 
     Mazo* deck;
 
@@ -185,11 +188,12 @@ private:
 
     std::vector<int> mazo;
 
-    std::vector<int> myCards; //vector donde estan mis cartas
-    //int sumOfCards; //int que almacena la suma de los numeros de mis cartas
-    std::vector<int> opponentCards; //vector donde estan las cartas del oponente (puesto por si acaso)
-    int sumOfOpponent; //int que almacena la suma de los numeros de las cartas del oponente
-    int fCardOFOp=0;
+    //std::vector<int> myCards; //vector donde estan mis cartas
+    int myCards; //int que almacena la suma de los numeros de mis cartas
+    //std::vector<int> opponentCards; //vector donde estan las cartas del oponente (puesto por si acaso)
+    int opponentCards; //int que almacena la suma de los numeros de las cartas del oponente
+    int fCardOfOp;
+    int fMyCards;
 
     //const int N_CARTASPORPALO = 13; //no hay joker
     //const int N_PALOS = 4; //n cartas por palo

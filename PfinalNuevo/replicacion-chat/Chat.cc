@@ -31,10 +31,16 @@ void Message::to_bin()
         memcpy(tmp, &type, sizeof(uint8_t));
         tmp += sizeof(uint8_t);
             
-        memcpy(tmp, &message1, sizeof(uint8_t));
+        memcpy(tmp, &sum1, sizeof(uint8_t));
         tmp += sizeof(uint8_t);
 
-        memcpy(tmp, &message2, sizeof(uint8_t));
+         memcpy(tmp, &sum2, sizeof(uint8_t));
+        tmp += sizeof(uint8_t);
+
+        memcpy(tmp, &resta1, sizeof(uint8_t));
+        tmp += sizeof(uint8_t);
+
+        memcpy(tmp, &resta2, sizeof(uint8_t));
 
 
 
@@ -63,10 +69,16 @@ int Message::from_bin(char * obj)
     memcpy(&type, tmp, sizeof(uint8_t));
     tmp += sizeof(uint8_t);
             
-    memcpy(&message1, tmp, sizeof(uint8_t));
+    memcpy(&sum1, tmp, sizeof(uint8_t));
     tmp += sizeof(uint8_t);
 
-    memcpy(&message2, tmp, sizeof(uint8_t));
+    memcpy(&sum2, tmp, sizeof(uint8_t));
+    tmp += sizeof(uint8_t);
+
+    memcpy(&resta1, tmp, sizeof(uint8_t));
+    tmp += sizeof(uint8_t);
+
+    memcpy(&resta2, tmp, sizeof(uint8_t));
     tmp += sizeof(uint8_t);
 
     messageX = tmp;
@@ -121,6 +133,13 @@ void ChatServer::do_messages()
             }
             
         }
+         else if(message.type == message.START){
+            std::cout << "START " << *messageSocket << "\n";
+            for(auto it = clients.begin(); it != clients.end(); ++it){
+                if(!(**it == *messageSocket)) socket.send(message, **it);
+            }
+            
+        }
     }
 }
 
@@ -130,9 +149,11 @@ void ChatServer::do_messages()
 void ChatClient::login()
 {
     std::string msg;
-    //std::vector<int> msg1=myCards;
-    //std::vector<int> msg2=opponentCards;
-    Message em(nick, msg,1,1);
+    myCards=0;
+    opponentCards=0;
+    fCardOfOp=0;
+    fMyCards=0;
+    Message em(nick, msg,myCards,opponentCards,fMyCards,fCardOfOp);
     em.type = Message::LOGIN;
     creaMazo();
 
@@ -141,14 +162,15 @@ void ChatClient::login()
 
 void ChatClient::logout()
 {
-    myCards.clear();
-    opponentCards.clear();
-    // Completar
+    myCards=0;
+    opponentCards=0;
+    fCardOfOp=0;
+    fMyCards=0;
+    
     std::string msg;
-    //std::vector<int> msg1=myCards;
-    //std::vector<int> msg2=opponentCards;
+    
 
-    Message em(nick, msg,1,1);
+    Message em(nick, msg,myCards,opponentCards,fMyCards,fCardOfOp);
     em.type = Message::LOGOUT;
 
     socket.send(em, socket);
@@ -165,41 +187,47 @@ void ChatClient::input_thread()
         std::cout<<"Escriba: start para empezar o exit para salir\n";
         std::cout << "Desea pedir o plantarse" << "\n"<<"Hit-> 1 \nStand->2\n";
 
-        std::cout << "Valor de tus cartas: " << checkCards(myCards) << "\n";
-        std::cout << "Valor cartas del oponente: ?+"<<checkCards(opponentCards)<<"\n";
+        std::cout << "Valor de tus cartas: " << myCards << "\n";
+        std::cout << "Valor cartas del oponente: ?+"<<opponentCards-fCardOfOp<<"\n";
         std::getline(std::cin, msg);
 
         if(msg == "exit"){
             chat = false;
         }
         else if(msg=="start"){
-            myCards.push_back(sacaCarta());
-            myCards.push_back(sacaCarta());
 
-            opponentCards.push_back(sacaCarta());
-            opponentCards.push_back(sacaCarta());
-            //Message em(nick, msg,myCards,opponentCards);
-            //em.type = Message::HIT;
+            myCards=0;
+            opponentCards=0;
+            fCardOfOp=0;
+            fMyCards=0;
 
-            //socket.send(em, socket);
+            myCards+=sacaCarta();
+            fMyCards=myCards;
+            myCards+=sacaCarta();
+
+            opponentCards+=sacaCarta();
+            fCardOfOp=opponentCards;
+            opponentCards+=sacaCarta();
+
+            Message em(nick, msg,myCards,opponentCards,fMyCards,fCardOfOp);
+            em.type=Message::START;
+
+            /*em.sum1=myCards;
+            em.resta1=fMyCards;
+            em.sum2=opponentCards;
+            em.resta2=fCardOfOp;*/
+
+            socket.send(em, socket);
         }
 
 
         else if (msg=="1"){
-            myCards.push_back(sacaCarta());
+            myCards+=sacaCarta();
            
-            //std::vector<int> msg1=myCards;
-            //std::vector<int> msg2=opponentCards;
-    
-            
-            int msg1=checkCards(myCards);
-            int msg2=checkCards(opponentCards);
-
-            Message em(nick, msg,msg1,msg2);
+            // Enviar al servidor usando socket
+            Message em(nick, msg,myCards,opponentCards,fMyCards,fCardOfOp);
             em.type = Message::HIT;
 
-            sumOfOpponent=checkCards(myCards);
-            fCardOFOp=opponentCards[0];
             socket.send(em, socket);
             
 
@@ -207,9 +235,9 @@ void ChatClient::input_thread()
          else if (msg=="2"){
             // Enviar al servidor usando socket
 
-            int msg1=checkCards(myCards);
-            int msg2=checkCards(opponentCards);
-            Message em(nick, msg,msg1,msg2);
+           
+            Message em(nick, msg,myCards,opponentCards,fMyCards,fCardOfOp);
+
             em.type = Message::STAND;
 
             socket.send(em, socket);
@@ -228,12 +256,16 @@ void ChatClient::net_thread()
         socket.recv(em, mSocket);
 
         //Mostrar en pantalla el mensaje de la forma "nick: mensaje"
-        std::cout << "Valor de tus cartas: " << em.message2 << "\n";
-        std::cout << "Valor cartas de "<< em.nick<<": ?+"<<em.message1<<"\n";
+        std::cout << "Valor de tus cartas: " << em.sum2 << "\n";
+        std::cout << "Valor cartas de "<< em.nick<<": ?+"<<em.sum1-em.resta1<<"\n";
         std::cout << "Desea pedir o plantarse" << "\n"<<"Hit-> 1 \nStand->2\n";
-
-
         
+        myCards=em.sum2;
+        opponentCards=em.sum1;
+        
+        fCardOfOp=em.resta2;
+        fMyCards=em.resta1;
+
     }
 }
 
