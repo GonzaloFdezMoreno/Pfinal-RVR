@@ -1,6 +1,6 @@
 #include <string>
 #include <string.h>
-#include <uinstd.h>
+#include <unistd.h>
 #include <vector>
 #include <memory>
 #include "Serializable.h"
@@ -21,9 +21,9 @@ public:
         END_ROUND //se acaba la ronda y se reinicia la partida
     };
 
-    Message() : nickname(""), type(0), message1(0), message2(0) {};
+    Message() : nick(""), type(0), message1(0), message2(0) {};
 
-    Message(const std::string& n, const uint8_t& t, const uint8_t& m1 = 0, const uint8_t& m2 = 0) : nickname(n), type(t), message1(m1), message2(m2) {};
+    Message(const std::string& n, const uint8_t& t, const uint8_t& m1 = 0, const uint8_t& m2 = 0) : nick(n), type(t), message1(m1), message2(m2) {};
 
     void to_bin() {
         alloc_data(MESSAGE_SIZE);
@@ -32,7 +32,7 @@ public:
 
         char* tmp = _data;
 
-        memcpy(tmp, nickname.c_str(), 9);
+        memcpy(tmp, nick.c_str(), 9);
         tmp += 8;
 
         memcpy(tmp, "\0", sizeof(char));
@@ -50,7 +50,7 @@ public:
     int from_bin(char * obj){
         char* tmp = obj;
 
-        nickname = tmp;
+        nick = tmp;
         tmp += 9;
 
         memcpy(&type, tmp, sizeof(uint8_t));
@@ -64,7 +64,7 @@ public:
         return 0;
     }
 
-    std::string nickname;
+    std::string nick;
     uint8_t type;
     uint8_t message1;
     uint8_t message2;
