@@ -198,6 +198,8 @@ private:
     //const int N_CARTASPORPALO = 13; //no hay joker
     //const int N_PALOS = 4; //n cartas por palo
 
+    bool myStand = false;
+    bool opStand = false;
 
 };
 

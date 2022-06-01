@@ -140,6 +140,14 @@ void ChatServer::do_messages()
             }
             
         }
+
+        else if(message.type == message.STAND){
+            std::cout << "STAND " << *messageSocket << "\n";
+            for(auto it = clients.begin(); it != clients.end(); ++it){
+                if(!(**it == *messageSocket)) socket.send(message, **it);
+            }
+            
+        }
     }
 }
 
@@ -181,6 +189,10 @@ void ChatClient::input_thread()
     bool chat = true;
     while (chat)
     {
+        if(myStand && opStand){
+            std::cout << "Ambos estan en stand\n";
+        }
+
         // Leer stdin con std::getline
         std::string msg;
 
@@ -195,6 +207,8 @@ void ChatClient::input_thread()
             chat = false;
         }
         else if(msg=="start"){
+            myStand = false;
+            opStand = false;
 
             myCards=0;
             opponentCards=0;
@@ -234,7 +248,7 @@ void ChatClient::input_thread()
         }
          else if (msg=="2"){
             // Enviar al servidor usando socket
-
+            myStand = true;
            
             Message em(nick, msg,myCards,opponentCards,fMyCards,fCardOfOp);
 
@@ -265,6 +279,14 @@ void ChatClient::net_thread()
         
         fCardOfOp=em.resta2;
         fMyCards=em.resta1;
+
+        if(em.type == Message::STAND){
+            opStand = true;
+        }
+
+        if(myStand && opStand){
+            std::cout << "ambos estan en stand\n";
+        }
 
     }
 }
