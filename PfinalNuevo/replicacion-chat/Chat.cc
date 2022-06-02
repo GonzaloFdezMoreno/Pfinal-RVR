@@ -199,6 +199,29 @@ void ChatClient::input_thread()
     {
         if(myStand && opStand){
             std::cout << "Ambos estan en stand\n";
+
+            if(myCards>opponentCards){
+
+                std::cout<<myCards<<"-------"<<opponentCards<<"\n";
+                std::cout << "Tu ganas!!! "<< "\n";
+
+            }
+
+            else if(myCards<opponentCards){
+
+                std::cout<<myCards<<"-------"<<opponentCards<<"\n";
+                std::cout << "Gana el oponente" << "\n";
+
+            }
+
+            else{
+
+                std::cout<<myCards<<"-------"<<opponentCards<<"\n";
+                std::cout << "Empate!!! "<< "\n";
+
+            }
+
+            chat=false;
         }
 
         // Leer stdin con std::getline
@@ -278,8 +301,6 @@ void ChatClient::input_thread()
 
                 std::cout << "Gana el oponente" << "\n";
 
-                
-
             }
 
             else if(myCards>21&&opponentCards>21){
@@ -288,8 +309,6 @@ void ChatClient::input_thread()
 
                 std::cout << "Ambos jugadores pierden" << "\n";
 
-                
-
             }
 
             else{
@@ -297,8 +316,6 @@ void ChatClient::input_thread()
                 std::cout<<myCards<<"-------"<<opponentCards;
 
                 std::cout << "Tu ganas!!! "<< "\n";
-
-                
 
             }
 
@@ -339,6 +356,24 @@ void ChatClient::net_thread()
 
         if(myStand && opStand){
             std::cout << "ambos estan en stand\n";
+
+             if(myCards>opponentCards){
+
+                std::cout<<myCards<<"-------"<<opponentCards<<"\n";
+                std::cout << "Tu ganas!!! "<< "\n";
+            }
+
+            else if(myCards<opponentCards){
+
+                std::cout<<myCards<<"-------"<<opponentCards<<"\n";
+                std::cout << "Gana el oponente" << "\n";
+            }
+
+            else{
+
+                std::cout<<myCards<<"-------"<<opponentCards<<"\n";
+                std::cout << "Empate!!! "<< "\n";
+            }
         }
 
         if(em.type==8){
