@@ -148,6 +148,14 @@ void ChatServer::do_messages()
             }
             
         }
+
+         else if(message.type == message.END_ROUND){
+            std::cout << "ROUND_OVER " << *messageSocket << "\n";
+            for(auto it = clients.begin(); it != clients.end(); ++it){
+                if(!(**it == *messageSocket)) socket.send(message, **it);
+            }
+            
+        }
     }
 }
 
@@ -246,7 +254,8 @@ void ChatClient::input_thread()
             
 
         }
-         else if (msg=="2"){
+        
+        else if (msg=="2"){
             // Enviar al servidor usando socket
             myStand = true;
            
@@ -256,6 +265,50 @@ void ChatClient::input_thread()
 
             socket.send(em, socket);
         }
+
+        if(myCards>21||opponentCards>21){
+
+            Message em(nick,"8",myCards,opponentCards,fMyCards,fCardOfOp);
+
+            em.type = Message::END_ROUND;
+
+            if(myCards>21&&opponentCards<=21){
+
+                std::cout<<myCards<<"-------"<<opponentCards;
+
+                std::cout << "Gana el oponente" << "\n";
+
+                
+
+            }
+
+            else if(myCards>21&&opponentCards>21){
+
+                std::cout<<myCards<<"-------"<<opponentCards;
+
+                std::cout << "Ambos jugadores pierden" << "\n";
+
+                
+
+            }
+
+            else{
+
+                std::cout<<myCards<<"-------"<<opponentCards;
+
+                std::cout << "Tu ganas!!! "<< "\n";
+
+                
+
+            }
+
+            socket.send(em, socket);
+
+            chat=false;
+
+        }
+
+
     }
     logout();
 }
@@ -286,6 +339,35 @@ void ChatClient::net_thread()
 
         if(myStand && opStand){
             std::cout << "ambos estan en stand\n";
+        }
+
+        if(em.type==8){
+
+            if(myCards>21&&opponentCards<=21){
+
+                std::cout<<myCards<<"-------"<<opponentCards;
+
+                std::cout << "Gana el oponente" << "\n";
+
+
+            }
+
+            else if(myCards>21&&opponentCards>21){
+
+                std::cout<<myCards<<"-------"<<opponentCards;
+
+                std::cout << "Ambos jugadores pierden" << "\n";
+
+            }
+
+            else{
+
+                std::cout<<myCards<<"-------"<<opponentCards;
+
+                std::cout << "Tu ganas!!! "<< "\n";
+
+            }
+
         }
 
     }
