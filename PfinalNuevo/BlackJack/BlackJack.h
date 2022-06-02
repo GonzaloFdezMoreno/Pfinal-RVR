@@ -3,10 +3,10 @@
 #include <string.h>
 #include <vector>
 #include <memory>
+#include <ctime>
 
 #include "Serializable.h"
 #include "Socket.h"
-#include "Mazo.cc"
 
 
 //------------------------------------------------------------------------------
@@ -48,8 +48,6 @@ public:
     uint8_t resta1;
     uint8_t resta2;
     
-
-    Mazo* deck;
 
 };
 

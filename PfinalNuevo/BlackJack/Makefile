@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-g -I.
-DEPS = Socket.h Chat.h
-OBJ = Socket.o Chat.o
+DEPS = Socket.h BlackJack.h
+OBJ = Socket.o BlackJack.o
 LIBS=-lpthread
 
 %.o: %.cc $(DEPS)
@@ -9,10 +9,10 @@ LIBS=-lpthread
 
 all: cs cc
 
-cs: $(OBJ) ChatServer.o
+cs: $(OBJ) BlackJackServer.o
 	g++ -o $@ $^ $(CFLAGS) $(LIBS)
 
-cc: $(OBJ) ChatClient.o
+cc: $(OBJ) BlackJackClient.o
 	g++ -o $@ $^ $(CFLAGS) $(LIBS)
 
 

@@ -239,7 +239,7 @@ void BlackJackClient::input_thread()
         }
 
 
-        else if (msg=="1"){
+        else if (msg=="1" && !myStand){
             myCards+=sacaCarta();
            
             // Enviar al servidor usando socket
@@ -311,17 +311,16 @@ void BlackJackClient::net_thread()
     {
         //Recibir Mensajes de red
         socket.recv(em, mSocket);
-
-        //Mostrar en pantalla el mensaje de la forma "nick: mensaje"
-        std::cout << "Valor de tus cartas: " << em.sum2 << "\n";
-        std::cout << "Valor cartas de "<< em.nick<<": ?+"<<em.sum1-em.resta1<<"\n";
-        std::cout << "Desea pedir o plantarse" << "\n"<<"Hit-> 1 \nStand->2\n";
         
         myCards=em.sum2;
         opponentCards=em.sum1;
         
         fCardOfOp=em.resta2;
         fMyCards=em.resta1;
+
+        std::cout << "Valor de tus cartas: " << myCards << "\n";
+        std::cout << "Valor cartas de "<< em.nick<<": ?+"<<opponentCards-fCardOfOp<<"\n";
+        std::cout << "Desea pedir o plantarse" << "\n"<<"Hit-> 1 \nStand->2\n";
 
         if(em.type == Message::STAND){
             opStand = true;
