@@ -12,48 +12,6 @@
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 
-/**
- *  Mensaje del protocolo de la aplicación de Chat
- *
- *  +-------------------+
- *  | Tipo: uint8_t     | 0 (login), 1 (mensaje), 2 (logout)
- *  +-------------------+
- *  | Nick: char[8]     | Nick incluido el char terminación de cadena '\0'
- *  +-------------------+
- *  |                   |
- *  | Mensaje: char[80] | Mensaje incluido el char terminación de cadena '\0'
- *  |                   |
- *  +-------------------+
- *
- */
-
-
-/*class ChatMessage: public Serializable
-{
-public:
-    static const size_t MESSAGE_SIZE = sizeof(char) * 88 + sizeof(uint8_t);
-
-    enum MessageType
-    {
-        LOGIN   = 0,
-        MESSAGE = 1,
-        LOGOUT  = 2
-    };
-
-    ChatMessage(){};
-
-    ChatMessage(const std::string& n, const std::string& m):nick(n),message(m){};
-
-    void to_bin();
-
-    int from_bin(char * bobj);
-
-    uint8_t type;
-
-    std::string nick;
-    std::string message;
-};*/
-
 
 class Message: public Serializable {
 public:
@@ -99,12 +57,12 @@ public:
 // -----------------------------------------------------------------------------
 
 /**
- *  Clase para el servidor de chat
+ *  Clase para el servidor de BlackJack
  */
-class ChatServer
+class BlackJackServer
 {
 public:
-    ChatServer(const char * s, const char * p): socket(s, p)
+    BlackJackServer(const char * s, const char * p): socket(s, p)
     {
         socket.bind();
     };
@@ -117,7 +75,7 @@ public:
 
 private:
     /**
-     *  Lista de clientes conectados al servidor de Chat, representados por
+     *  Lista de clientes conectados al servidor de BlackJack, representados por
      *  su socket
      */
     std::vector<std::unique_ptr<Socket>> clients;
@@ -133,9 +91,9 @@ private:
 // -----------------------------------------------------------------------------
 
 /**
- *  Clase para el cliente de chat
+ *  Clase para el cliente de BlackJack
  */
-class ChatClient
+class BlackJackClient
 {
 public:
     /**
@@ -143,7 +101,7 @@ public:
      * @param p puerto del servidor
      * @param n nick del usuario
      */
-    ChatClient(const char * s, const char * p, const char * n):socket(s, p),
+    BlackJackClient(const char * s, const char * p, const char * n):socket(s, p),
         nick(n){};
 
     /**

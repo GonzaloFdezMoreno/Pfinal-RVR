@@ -1,21 +1,10 @@
-#include "Chat.h"
+#include "BlackJack.h"
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 
 void Message::to_bin()
 {
-    /*alloc_data(MESSAGE_SIZE);
-
-    memset(_data, 0, MESSAGE_SIZE);
-
-    //Serializar los campos type, nick y message en el buffer _data
-    char * tmp = _data;
-    memcpy(tmp, &type, sizeof(uint8_t));
-    tmp += sizeof(uint8_t);
-    memcpy(tmp, nick.c_str(), 8 * sizeof(char));
-    tmp += 8 * sizeof(char);
-    memcpy(tmp, message.c_str(), 80 * sizeof(char));*/
      alloc_data(MESSAGE_SIZE);
 
         memset(_data, 0, MESSAGE_SIZE);
@@ -49,19 +38,6 @@ void Message::to_bin()
 
 int Message::from_bin(char * obj)
 {
-    /*alloc_data(MESSAGE_SIZE);
-
-    memcpy(static_cast<void *>(_data), bobj, MESSAGE_SIZE);
-
-    //Reconstruir la clase usando el buffer _data
-    char * tmp = _data;
-    memcpy(&type, tmp, sizeof(uint8_t));
-    tmp += sizeof(uint8_t);
-    nick = tmp;
-    tmp += 8 * sizeof(char);
-    message = tmp;
-
-    return 0;*/
     char* tmp = obj;
 
     nick = tmp;
@@ -84,15 +60,12 @@ int Message::from_bin(char * obj)
     messageX = tmp;
 
     return 0;
-
-
-
 }
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 
-void ChatServer::do_messages()
+void BlackJackServer::do_messages()
 {
     while (true)
     {
@@ -162,7 +135,7 @@ void ChatServer::do_messages()
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 
-void ChatClient::login()
+void BlackJackClient::login()
 {
     std::string msg;
     myCards=0;
@@ -176,7 +149,7 @@ void ChatClient::login()
     socket.send(em, socket);
 }
 
-void ChatClient::logout()
+void BlackJackClient::logout()
 {
     myCards=0;
     opponentCards=0;
@@ -192,7 +165,7 @@ void ChatClient::logout()
     socket.send(em, socket);
 }
 
-void ChatClient::input_thread()
+void BlackJackClient::input_thread()
 {
     bool chat = true;
     while (chat)
@@ -330,7 +303,7 @@ void ChatClient::input_thread()
     logout();
 }
 
-void ChatClient::net_thread()
+void BlackJackClient::net_thread()
 {
     Message em;
     Socket *mSocket = new Socket(socket);
@@ -408,7 +381,7 @@ void ChatClient::net_thread()
     }
 }
 
- int ChatClient::checkCards(const std::vector<int>& mano){
+ int BlackJackClient::checkCards(const std::vector<int>& mano){
         int total = 0;
         //primero sumo las cartas de mi mano
         for(int i = 0; i < mano.size(); i++){
@@ -418,7 +391,7 @@ void ChatClient::net_thread()
        
     }
 
-void ChatClient::creaMazo() {
+void BlackJackClient::creaMazo() {
     if(mazo.size()!=0){
        mazo.clear();
     }
@@ -431,7 +404,7 @@ void ChatClient::creaMazo() {
     baraja();
 }
 
-void ChatClient::baraja(){
+void BlackJackClient::baraja(){
      int aux;
         for (int i = 0; i < mazo.size(); i++) {
             int pos = std::rand() % mazo.size();
@@ -441,7 +414,7 @@ void ChatClient::baraja(){
         }
 }
 
-int ChatClient::sacaCarta(){
+int BlackJackClient::sacaCarta(){
     int pCarta=mazo.back();
        mazo.pop_back(); //Eliminamos la carta del mazo
        return pCarta;
