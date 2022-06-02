@@ -156,6 +156,7 @@ private:
 
     bool myStand = false;
     bool opStand = false;
+    bool round = false;
 
 };
 

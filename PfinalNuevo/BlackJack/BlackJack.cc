@@ -137,6 +137,9 @@ void BlackJackServer::do_messages()
 
 void BlackJackClient::login()
 {
+    myStand = false;
+    opStand = false;
+    round = false;
     std::string msg;
     myCards=0;
     opponentCards=0;
@@ -144,13 +147,16 @@ void BlackJackClient::login()
     fMyCards=0;
     Message em(nick, msg,myCards,opponentCards,fMyCards,fCardOfOp);
     em.type = Message::LOGIN;
-    creaMazo();
+    //creaMazo();
 
     socket.send(em, socket);
 }
 
 void BlackJackClient::logout()
 {
+    myStand = false;
+    opStand = false;
+    round = false;
     myCards=0;
     opponentCards=0;
     fCardOfOp=0;
@@ -194,25 +200,30 @@ void BlackJackClient::input_thread()
 
             }
 
-            chat=false;
+            round = false;
         }
 
         // Leer stdin con std::getline
         std::string msg;
 
-        std::cout<<"Escriba: start para empezar o exit para salir\n";
+        if(!round) std::cout<<"Escriba: start para empezar o exit para salir\n";
+        else{
+        if(opStand) std::cout << "El oponente esta plantado\n";
         std::cout << "Desea pedir o plantarse" << "\n"<<"Hit-> 1 \nStand->2\n";
 
         std::cout << "Valor de tus cartas: " << myCards << "\n";
-        std::cout << "Valor cartas del oponente: ?+"<<opponentCards-fCardOfOp<<"\n";
+        std::cout << "Valor cartas del oponente: ?+"<<opponentCards-fCardOfOp<<"\n";}
         std::getline(std::cin, msg);
 
         if(msg == "exit"){
             chat = false;
+            round = false;
         }
-        else if(msg=="start"){
+        else if(msg=="start" && !round){
             myStand = false;
             opStand = false;
+            round = true;
+            creaMazo();
 
             myCards=0;
             opponentCards=0;
@@ -239,7 +250,7 @@ void BlackJackClient::input_thread()
         }
 
 
-        else if (msg=="1" && !myStand){
+        else if (msg=="1" && !myStand && round){
             myCards+=sacaCarta();
            
             // Enviar al servidor usando socket
@@ -251,7 +262,7 @@ void BlackJackClient::input_thread()
 
         }
         
-        else if (msg=="2"){
+        else if (msg=="2" && round){
             // Enviar al servidor usando socket
             myStand = true;
            
@@ -262,7 +273,7 @@ void BlackJackClient::input_thread()
             socket.send(em, socket);
         }
 
-        if(myCards>21||opponentCards>21){
+        if((myCards>21||opponentCards>21)){
 
             Message em(nick,"8",myCards,opponentCards,fMyCards,fCardOfOp);
 
@@ -291,10 +302,10 @@ void BlackJackClient::input_thread()
                 std::cout << "Tu ganas!!! "<< "\n";
 
             }
-
+            
+            round = false;
             socket.send(em, socket);
-
-            chat=false;
+            
 
         }
 
@@ -315,15 +326,24 @@ void BlackJackClient::net_thread()
         myCards=em.sum2;
         opponentCards=em.sum1;
         
-        fCardOfOp=em.resta2;
-        fMyCards=em.resta1;
+        fCardOfOp=em.resta1;
+        fMyCards=em.resta2;
 
         std::cout << "Valor de tus cartas: " << myCards << "\n";
         std::cout << "Valor cartas de "<< em.nick<<": ?+"<<opponentCards-fCardOfOp<<"\n";
         std::cout << "Desea pedir o plantarse" << "\n"<<"Hit-> 1 \nStand->2\n";
 
-        if(em.type == Message::STAND){
+        
+        if(em.type == Message::START){
+            myStand = false;
+            opStand = false;
+            round = true;
+            creaMazo();
+        }
+
+        else if(em.type == Message::STAND){
             opStand = true;
+            std::cout << "El oponente se ha plantado\n";
         }
 
         if(myStand && opStand){
@@ -346,6 +366,9 @@ void BlackJackClient::net_thread()
                 std::cout<<myCards<<"-------"<<opponentCards<<"\n";
                 std::cout << "Empate!!! "<< "\n";
             }
+
+            std::cout << "Escriba: start para empezar o exit para salir\n";
+            round  = false;
         }
 
         if(em.type==8){
@@ -374,6 +397,9 @@ void BlackJackClient::net_thread()
                 std::cout << "Tu ganas!!! "<< "\n";
 
             }
+            std::cout << "Escriba: start para empezar o exit para salir\n";
+
+            round = false;
 
         }
 
